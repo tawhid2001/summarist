@@ -1,5 +1,4 @@
-import Sidebar from "@/components/app/Sidebar";
-import SearchBar from "@/components/app/SearchBar";
+import DashboardContent from "@/components/app/DashboardContent";
 
 export default function DashboardLayout({
   children,
@@ -7,13 +6,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <SearchBar />
-
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
+    <DashboardContent>
+      {children}
+    </DashboardContent>
   );
 }

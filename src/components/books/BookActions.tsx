@@ -27,7 +27,7 @@ export default function BookActions({
   
   console.log("isSubscribed: ", isSubscribed);
 
-  
+
   function handleAction() {
     if (!user) {
       dispatch(openAuthModal());
@@ -39,9 +39,7 @@ export default function BookActions({
       return;
     }
 
-    router.push(`/book/${bookId}`);
-
-    // router.push(`/player/${bookId}`);
+    router.push(`/player/${bookId}`);
   }
 
   return (

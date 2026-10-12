@@ -9,6 +9,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
 import { RootState } from "@/redux/store";
 import { openAuthModal } from "@/redux/features/authModalSlice";
+import { setFontSize } from "@/redux/features/readerSlice";
+
+import SidebarLogo from "../../../public/assets/logo.png";
+
+import { RiFontSize } from "react-icons/ri";
 
 import {
   FiHome,
@@ -21,11 +26,38 @@ import {
   FiLogOut,
 } from "react-icons/fi";
 
-export default function Sidebar() {
+type SidebarProps = {
+  mobile?: boolean;
+  onClose?: () => void;
+};
+
+export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const dispatch = useDispatch();
+  const isPlayerPage = pathname.startsWith("/player/");
 
   const user = useSelector((state: RootState) => state.auth.user);
+
+  const fontSizes = [
+    {
+      size: 16,
+      className: "text-base",
+    },
+    {
+      size: 18,
+      className: "text-lg",
+    },
+    {
+      size: 20,
+      className: "text-xl",
+    },
+    {
+      size: 24,
+      className: "text-2xl",
+    },
+  ];
+
+  const fontSize = useSelector((state: RootState) => state.reader.fontSize);
 
   const handleLogout = async () => {
     try {
@@ -59,11 +91,19 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[196px] shrink-0 flex-col overflow-y-scroll bg-[#f1f6f4] md:flex">
+    <aside
+      className={`top-0 flex shrink-0 flex-col overflow-y-auto bg-[#f1f6f4] ${
+        mobile
+          ? "h-dvh w-full"
+          : `sticky hidden w-[196px] md:flex ${
+              isPlayerPage ? "h-[calc(100dvh-92px)]" : "h-dvh"
+            }`
+      }`}
+    >
       {/* Logo */}
       <div className="p-4">
         <Image
-          src="/assets/logo.png"
+          src={SidebarLogo}
           alt="Summarist logo"
           width={160}
           height={40}
@@ -94,6 +134,7 @@ export default function Sidebar() {
             <Link
               key={item.label}
               href={item.href}
+              onClick={mobile ? onClose : undefined}
               className={`text-primary h-14 hover:bg-gray-200 flex items-center gap-3 border-l-2 px-5 py-4  ${
                 isActive ? "border-accent border-l-[5px]" : "border-transparent"
               }`}
@@ -105,14 +146,34 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {isPlayerPage && (
+        <div className="flex items-center justify-center gap-4 px-4 mx-auto">
+          {fontSizes.map((option) => {
+            const isSelected = fontSize === option.size;
+
+            return (
+              <div
+                key={option.size}
+                onClick={() => dispatch(setFontSize(option.size))}
+                className={`text-primary relative pb-2 font-medium w-full ${option.className} ${
+                  isSelected &&
+                  "after:bg-accent after:absolute after:bottom-0 after:left-1/2 after:h-[3px] after:w-[22px] after:-translate-x-1/2 after:content-['']"
+                }`}
+              >
+                <RiFontSize />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Bottom Navigation */}
       <div className="mt-auto flex flex-col pb-6">
         <Link
           href="/settings"
+          onClick={mobile ? onClose : undefined}
           className={`text-primary h-14 hover:bg-gray-200 flex border-l-[5px] items-center gap-3 px-5 py-4 ${
-            pathname === "/settings"
-              ? "border-accent"
-              : "border-transparent"
+            pathname === "/settings" ? "border-accent" : "border-transparent"
           }`}
         >
           <FiSettings className="text-2xl" />
