@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiClock, FiStar } from "react-icons/fi";
 import { Book } from "@/types/book";
-import { useSelector, UseSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store"
+import useAudioDuration from "@/hooks/useAudioDuration";
+import formatDuration from "@/utils/formatDuration";
 
 type BookCardProps = {
   book: Book;
@@ -17,6 +19,10 @@ export default function BookCard({ book }: BookCardProps) {
   );
 
   const isSubscribed = user?.subscriptionStatus === "active" || user?.subscriptionStatus === "trialing";
+
+  const duration = useAudioDuration(
+  book.audioLink
+);
 
   return (
     <Link
@@ -57,7 +63,7 @@ export default function BookCard({ book }: BookCardProps) {
       <div className="text-secondary-text flex items-center gap-3 text-xs">
         <div className="flex items-center gap-1">
           <FiClock />
-          <span>04:40</span>
+          <span>{formatDuration(duration)}</span>
         </div>
 
         <div className="flex items-center gap-1">

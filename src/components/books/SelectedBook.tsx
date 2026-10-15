@@ -1,12 +1,28 @@
+"use client"
+
 import Image from "next/image";
 import { FaPlay } from "react-icons/fa";
 import { Book } from "@/types/book";
+import useAudioDuration from "@/hooks/useAudioDuration";
 
 type SelectedBookProps = {
   book: Book;
 };
 
 export default function SelectedBook({ book }: SelectedBookProps) {
+  const duration = useAudioDuration(book.audioLink);
+
+  function formatSelectedDuration(time: number) {
+  if (!Number.isFinite(time) || time <= 0) {
+    return "0 mins 0 seconds";
+  }
+
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+
+  return `${minutes} mins ${seconds} seconds`;
+}
+
   return (
     <section>
       <h2 className="text-primary mb-6 text-2xl font-semibold">
@@ -96,7 +112,7 @@ export default function SelectedBook({ book }: SelectedBookProps) {
               </button>
 
               <span className="text-primary text-sm font-medium max-[576px]:text-xs">
-                3 mins 23 secs
+                {formatSelectedDuration(duration)}
               </span>
             </div>
           </div>

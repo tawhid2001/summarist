@@ -1,13 +1,10 @@
 import Image from "next/image";
 import { getBookById } from "@/services/books";
-import { FaRegStar } from "react-icons/fa";
-import { GoClock } from "react-icons/go";
-import { HiOutlineLightBulb } from "react-icons/hi";
-import { PiMicrophone } from "react-icons/pi";
 import Link from "next/link";
 import BookActions from "@/components/books/BookActions";
 import LibraryButton from "@/components/books/LibraryButton";
 import PremiumLabel from "@/components/books/PremiumLabel";
+import BookMeta from "@/components/books/BookMeta";
 
 type BookPageProps = {
   params: Promise<{
@@ -47,29 +44,13 @@ export default async function BookPage({ params }: BookPageProps) {
           <hr className="my-6 border-gray-200" />
 
           {/* Metadata */}
-          <div className="grid max-w-[600px] grid-cols-2 gap-x-16 gap-y-4 max-[600px]:grid-cols-1">
-            <div className="text-primary flex items-center gap-3 text-lg font-semibold">
-              <FaRegStar className="shrink-0 text-2xl" />
-              <span>
-                {book.averageRating} ({book.totalRating} ratings)
-              </span>
-            </div>
-
-            <div className="text-primary flex items-center gap-3 text-lg font-semibold">
-              <GoClock className="shrink-0 text-2xl" />
-              <span>04:40</span>
-            </div>
-
-            <div className="text-primary flex items-center gap-3 text-lg font-semibold">
-              <PiMicrophone className="shrink-0 text-2xl" />
-              <span>{book.type}</span>
-            </div>
-
-            <div className="text-primary flex items-center gap-3 text-lg font-semibold">
-              <HiOutlineLightBulb className="shrink-0 text-2xl" />
-              <span>{book.keyIdeas} Key ideas</span>
-            </div>
-          </div>
+          <BookMeta
+            averageRating={book.averageRating}
+            totalRating={book.totalRating}
+            type={book.type}
+            keyIdeas={book.keyIdeas}
+            audioLink={book.audioLink}
+          />
 
           <hr className="my-6 border-gray-200" />
 

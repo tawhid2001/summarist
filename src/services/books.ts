@@ -1,12 +1,9 @@
 import { Book } from "@/types/book";
 import axios from "axios";
-import { resolve } from "path";
 
 const api = axios.create({
   baseURL: "https://us-central1-summaristt.cloudfunctions.net",
 });
-
-const BASE_URL = "https://us-central1-summaristt.cloudfunctions.net";
 
 export async function getSelectedBook(): Promise<Book> {
   const response = await api.get<Book[]>("/getBooks?status=selected");

@@ -3,18 +3,9 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  doc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
-import {
-  FaPause,
-  FaPlay,
-  FaRotateLeft,
-  FaRotateRight,
-} from "react-icons/fa6";
+import { FaPause, FaPlay, FaRotateLeft, FaRotateRight } from "react-icons/fa6";
 
 import { db } from "@/firebase/firebase";
 import { RootState } from "@/redux/store";
@@ -24,25 +15,16 @@ type AudioPlayerProps = {
   book: Book;
 };
 
-export default function AudioPlayer({
-  book,
-}: AudioPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(
-    null
-  );
+export default function AudioPlayer({ book }: AudioPlayerProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const user = useSelector(
-    (state: RootState) => state.auth.user
-  );
+  const user = useSelector((state: RootState) => state.auth.user);
 
-  const [isPlaying, setIsPlaying] =
-    useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const [currentTime, setCurrentTime] =
-    useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
 
-  const [duration, setDuration] =
-    useState(0);
+  const [duration, setDuration] = useState(0);
 
   function formatTime(time: number) {
     if (!Number.isFinite(time)) {
@@ -52,9 +34,7 @@ export default function AudioPlayer({
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
 
-    return `${minutes}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }
 
   function syncDuration() {
@@ -64,10 +44,7 @@ export default function AudioPlayer({
 
     const audioDuration = audio.duration;
 
-    if (
-      Number.isFinite(audioDuration) &&
-      audioDuration > 0
-    ) {
+    if (Number.isFinite(audioDuration) && audioDuration > 0) {
       setDuration(audioDuration);
     }
   }
@@ -81,10 +58,7 @@ export default function AudioPlayer({
       try {
         await audio.play();
       } catch (error) {
-        console.error(
-          "Audio playback failed:",
-          error
-        );
+        console.error("Audio playback failed:", error);
       }
     } else {
       audio.pause();
@@ -96,10 +70,7 @@ export default function AudioPlayer({
 
     if (!audio) return;
 
-    const newTime = Math.max(
-      0,
-      audio.currentTime - 10
-    );
+    const newTime = Math.max(0, audio.currentTime - 10);
 
     audio.currentTime = newTime;
     setCurrentTime(newTime);
@@ -111,32 +82,24 @@ export default function AudioPlayer({
     if (!audio) return;
 
     const audioDuration =
-      Number.isFinite(audio.duration) &&
-      audio.duration > 0
+      Number.isFinite(audio.duration) && audio.duration > 0
         ? audio.duration
         : duration;
 
     if (audioDuration <= 0) return;
 
-    const newTime = Math.min(
-      audioDuration,
-      audio.currentTime + 10
-    );
+    const newTime = Math.min(audioDuration, audio.currentTime + 10);
 
     audio.currentTime = newTime;
     setCurrentTime(newTime);
   }
 
-  function handleSeek(
-    event: React.ChangeEvent<HTMLInputElement>
-  ) {
+  function handleSeek(event: React.ChangeEvent<HTMLInputElement>) {
     const audio = audioRef.current;
 
     if (!audio) return;
 
-    const newTime = Number(
-      event.target.value
-    );
+    const newTime = Number(event.target.value);
 
     audio.currentTime = newTime;
     setCurrentTime(newTime);
@@ -146,13 +109,7 @@ export default function AudioPlayer({
     if (!user) return;
 
     try {
-      const finishedBookRef = doc(
-        db,
-        "users",
-        user.uid,
-        "finished",
-        book.id
-      );
+      const finishedBookRef = doc(db, "users", user.uid, "finished", book.id);
 
       await setDoc(
         finishedBookRef,
@@ -162,13 +119,10 @@ export default function AudioPlayer({
         },
         {
           merge: true,
-        }
+        },
       );
     } catch (error) {
-      console.error(
-        "Failed to mark book as finished:",
-        error
-      );
+      console.error("Failed to mark book as finished:", error);
     }
   }
 
@@ -213,31 +167,29 @@ export default function AudioPlayer({
         onEnded={handleAudioEnded}
       />
 
-      <div className="bg-primary fixed right-0 bottom-0 left-0 z-[100] h-auto p-4 text-white">
-        <div className="flex h-full flex-col items-center justify-center gap-4 px-10 max-[768px]:px-4 md:flex-row">
+      <div className="bg-primary fixed right-0 bottom-0 left-0 z-[100] p-4 text-white">
+        <div className="grid min-h-[76px] w-full grid-cols-[1fr_auto_1fr] items-center gap-8 px-4 max-[768px]:flex max-[768px]:flex-col max-[768px]:gap-4">
           {/* Book information */}
-          <div className="flex w-[320px] shrink-0 items-center gap-4 max-[900px]:w-[240px]">
+          <div className="flex min-w-0 items-center gap-4 justify-center md:justify-self-start max-[768px]:w-full">
             <Image
               src={book.imageLink}
               alt={book.title}
               width={50}
               height={65}
-              className="h-[60px] w-auto"
+              className="h-[60px] w-auto shrink-0"
             />
 
-            <div className="min-w-0">
-              <p className="truncate font-semibold">
-                {book.title}
-              </p>
+            <div className="min-w-0 max-w-[350px]">
+              <p className="text-base font-semibold leading-5">{book.title}</p>
 
-              <p className="truncate text-sm text-gray-300">
+              <p className="mt-1 truncate text-sm text-gray-300">
                 {book.author}
               </p>
             </div>
           </div>
 
           {/* Audio controls */}
-          <div className="flex shrink-0 items-center justify-center gap-7 max-[768px]:gap-5">
+          <div className="flex items-center justify-center gap-8 justify-self-center">
             <button
               type="button"
               onClick={skipBackward}
@@ -254,16 +206,10 @@ export default function AudioPlayer({
             <button
               type="button"
               onClick={togglePlay}
-              aria-label={
-                isPlaying ? "Pause" : "Play"
-              }
+              aria-label={isPlaying ? "Pause" : "Play"}
               className="text-primary flex h-12 w-12 items-center justify-center rounded-full bg-white"
             >
-              {isPlaying ? (
-                <FaPause />
-              ) : (
-                <FaPlay className="ml-1" />
-              )}
+              {isPlaying ? <FaPause /> : <FaPlay className="ml-1" />}
             </button>
 
             <button
@@ -281,8 +227,8 @@ export default function AudioPlayer({
           </div>
 
           {/* Progress */}
-          <div className="mx-auto flex w-full min-w-0 flex-1 items-center justify-center gap-4">
-            <span className="w-[42px] shrink-0 text-right text-sm">
+          <div className="flex w-full max-w-[580px] items-center gap-4 justify-self-end">
+            <span className="w-[45px] shrink-0 text-right text-sm">
               {formatTime(currentTime)}
             </span>
 
@@ -291,21 +237,14 @@ export default function AudioPlayer({
               min={0}
               max={duration > 0 ? duration : 1}
               step={0.1}
-              value={
-                duration > 0
-                  ? Math.min(
-                      currentTime,
-                      duration
-                    )
-                  : 0
-              }
+              value={duration > 0 ? Math.min(currentTime, duration) : 0}
               onChange={handleSeek}
               disabled={duration === 0}
               aria-label="Audio progress"
-              className="w-full max-w-[500px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 max-[1100px]:max-w-[350px]"
+              className="min-w-0 flex-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             />
 
-            <span className="w-[42px] shrink-0 text-sm">
+            <span className="w-[45px] shrink-0 text-sm">
               {formatTime(duration)}
             </span>
           </div>

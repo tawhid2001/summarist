@@ -19,11 +19,7 @@ export default function SearchBar({ onMenuClick }: SearchBarProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!search.trim()) {
-      setResults([]);
-      setLoading(false);
-      return;
-    }
+    if (!search.trim()) return;
 
     const timer = setTimeout(async () => {
       try {
@@ -51,7 +47,16 @@ export default function SearchBar({ onMenuClick }: SearchBarProps) {
           <input
             type="text"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+
+              setSearch(value);
+
+              if (!value.trim()) {
+                setResults([]);
+                setLoading(false);
+              }
+            }}
             placeholder="Search for books"
             className="h-full min-w-0 flex-1 bg-transparent px-4 outline-none"
           />

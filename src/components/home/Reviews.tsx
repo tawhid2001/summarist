@@ -1,4 +1,8 @@
+'use client';
+
 import { BsStarFill } from "react-icons/bs";
+import { useDispatch } from "react-redux";
+import { openAuthModal } from "@/redux/features/authModalSlice";
 
 const reviews = [
   {
@@ -46,6 +50,7 @@ const reviews = [
 ];
 
 export default function Reviews() {
+  const dispatch = useDispatch();
   return (
     <section id="reviews">
       <div className="mx-auto w-full max-w-[1070px] px-6">
@@ -77,7 +82,7 @@ export default function Reviews() {
             ))}
           </div>
           <div className="flex justify-center">
-            <button className="bg-accent text-primary hover:bg-accent-hover flex h-10 w-full max-w-[300px] min-w-[180px] items-center justify-center rounded text-base transition-colors duration-200 active:translate-y-px">
+            <button onClick={() => dispatch(openAuthModal())} className="bg-accent text-primary hover:bg-accent-hover flex h-10 w-full max-w-[300px] min-w-[180px] items-center justify-center rounded text-base transition-colors duration-200 active:translate-y-px">
               Login
             </button>
           </div>

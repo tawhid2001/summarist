@@ -17,10 +17,12 @@ import {
 import { auth } from "@/firebase/firebase";
 import { FirebaseError } from "firebase/app";
 import { FaCircleNotch } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 export default function AuthModal() {
   const googleProvider = new GoogleAuthProvider();
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,6 +49,7 @@ export default function AuthModal() {
         await createUserWithEmailAndPassword(auth, email, password);
       }
       dispatch(closeAuthModal());
+      router.push("/for-you");
     } catch (error) {
       console.error(error);
       if (error instanceof FirebaseError) {
@@ -88,6 +91,7 @@ export default function AuthModal() {
       );
 
       dispatch(closeAuthModal());
+      router.push("/for-you");
     } catch (error) {
       console.error(error);
       setError("Guest login failed. Please try again.");
@@ -103,6 +107,7 @@ export default function AuthModal() {
     try {
       await signInWithPopup(auth, googleProvider);
       dispatch(closeAuthModal());
+      router.push("/for-you");
     } catch (error) {
       console.error(error);
       if (error instanceof FirebaseError) {

@@ -1,7 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import LandingImg from "../../../public/assets/landing.png"
 
+import { useDispatch } from "react-redux";
+import { openAuthModal } from "@/redux/features/authModalSlice";
+
 export default function Hero() {
+  const dispatch = useDispatch();
+
   return (
     <section>
       <div className="w-full py-10">
@@ -21,7 +28,7 @@ export default function Hero() {
                 and even people who don&apos;t like to read.
               </p>
 
-              <button className="bg-accent text-primary hover:bg-accent-hover flex h-10 w-full max-w-[300px] min-w-[180px] items-center justify-center rounded text-base transition-colors duration-200 active:translate-y-px">
+              <button onClick={() => dispatch(openAuthModal())} className="bg-accent text-primary hover:bg-accent-hover flex h-10 w-full max-w-[300px] min-w-[180px] items-center justify-center rounded text-base transition-colors duration-200 active:translate-y-px">
                 Login
               </button>
             </div>

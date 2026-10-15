@@ -1,4 +1,3 @@
-import AuthModal from "@/components/auth/AuthModal";
 import Features from "@/components/home/Features";
 import Footer from "@/components/home/Footer";
 import Hero from "@/components/home/Hero";
