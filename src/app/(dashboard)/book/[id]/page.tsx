@@ -4,11 +4,10 @@ import { FaRegStar } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import { PiMicrophone } from "react-icons/pi";
-import { LuBookOpenText } from "react-icons/lu";
-import { TiMicrophoneOutline } from "react-icons/ti";
-import { CiBookmark } from "react-icons/ci";
 import Link from "next/link";
 import BookActions from "@/components/books/BookActions";
+import LibraryButton from "@/components/books/LibraryButton";
+import PremiumLabel from "@/components/books/PremiumLabel";
 
 type BookPageProps = {
   params: Promise<{
@@ -38,7 +37,7 @@ export default async function BookPage({ params }: BookPageProps) {
         <div>
           <h1 className="text-primary mb-2 text-3xl font-semibold">
             {book.title}
-            {book.subscriptionRequired && <span> (Premium)</span>}
+            <PremiumLabel subscriptionRequired={book.subscriptionRequired} />
           </h1>
 
           <p className="text-primary mb-6 font-semibold">{book.author}</p>
@@ -75,15 +74,15 @@ export default async function BookPage({ params }: BookPageProps) {
           <hr className="my-6 border-gray-200" />
 
           {/* Buttons */}
-          <BookActions bookId={id} subscriptionRequired={book.subscriptionRequired} />
+          <BookActions
+            bookId={id}
+            subscriptionRequired={book.subscriptionRequired}
+          />
           <Link
             href="#"
             className="text-blue-500 flex items-center gap-2 font-semibold mb-10"
           >
-            <span>
-              <CiBookmark className="text-2xl" />
-            </span>
-            <span className="font-medium stretch">Add title to My Library</span>
+            <LibraryButton book={book} />
           </Link>
 
           {/* Description */}

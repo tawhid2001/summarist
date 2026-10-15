@@ -8,9 +8,7 @@ type PlayerPageProps = {
   }>;
 };
 
-export default async function PlayerPage({
-  params,
-}: PlayerPageProps) {
+export default async function PlayerPage({ params }: PlayerPageProps) {
   const { id } = await params;
 
   const book = await getBookById(id);
@@ -31,12 +29,7 @@ export default async function PlayerPage({
       </main>
 
       {/* Bottom player */}
-      <AudioPlayer
-        title={book.title}
-        author={book.author}
-        imageLink={book.imageLink}
-        audioLink={book.audioLink}
-      />
+      <AudioPlayer book={book} />
     </div>
   );
 }

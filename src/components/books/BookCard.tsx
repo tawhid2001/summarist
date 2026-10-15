@@ -1,20 +1,30 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { FiClock, FiStar } from "react-icons/fi";
 import { Book } from "@/types/book";
+import { useSelector, UseSelector } from "react-redux";
+import { RootState } from "@/redux/store"
 
 type BookCardProps = {
   book: Book;
 };
 
 export default function BookCard({ book }: BookCardProps) {
+  const user = useSelector(
+    (state: RootState) => state.auth.user
+  );
+
+  const isSubscribed = user?.subscriptionStatus === "active" || user?.subscriptionStatus === "trialing";
+
   return (
     <Link
       href={`/book/${book.id}`}
       className="group block w-full max-w-[180px] p-2 relative"
     >
       {/* Premium pill */}
-      {book.subscriptionRequired && (
+      {book.subscriptionRequired && !isSubscribed && (
         <span className="absolute top-0 right-0 rounded-full bg-[#032b41] px-2 py-1 text-[10px] font-medium text-white">
           Premium
         </span>

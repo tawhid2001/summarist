@@ -13,7 +13,7 @@ export default async function ForYouPage() {
   const suggestedBooks = await getSuggestedBooks();
 
   return (
-    <div className="mx-auto w-full max-w-[1070px] py-10 max-[768px]:px-6">
+    <div className="mx-auto w-full max-w-[1070px] py-10 px-4 max-[768px]:px-6">
       <SelectedBook book={selectedBook} />
 
       <BookSection

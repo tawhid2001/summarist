@@ -2,39 +2,74 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import {
-  FaPlay,
+  doc,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+
+import {
   FaPause,
+  FaPlay,
   FaRotateLeft,
   FaRotateRight,
 } from "react-icons/fa6";
 
+import { db } from "@/firebase/firebase";
+import { RootState } from "@/redux/store";
+import { Book } from "@/types/book";
+
 type AudioPlayerProps = {
-  title: string;
-  author: string;
-  imageLink: string;
-  audioLink: string;
+  book: Book;
 };
 
 export default function AudioPlayer({
-  title,
-  author,
-  imageLink,
-  audioLink,
+  book,
 }: AudioPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(
+    null
+  );
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const user = useSelector(
+    (state: RootState) => state.auth.user
+  );
+
+  const [isPlaying, setIsPlaying] =
+    useState(false);
+
+  const [currentTime, setCurrentTime] =
+    useState(0);
+
+  const [duration, setDuration] =
+    useState(0);
 
   function formatTime(time: number) {
-    if (!Number.isFinite(time)) return "0:00";
+    if (!Number.isFinite(time)) {
+      return "0:00";
+    }
 
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
 
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  }
+
+  function syncDuration() {
+    const audio = audioRef.current;
+
+    if (!audio) return;
+
+    const audioDuration = audio.duration;
+
+    if (
+      Number.isFinite(audioDuration) &&
+      audioDuration > 0
+    ) {
+      setDuration(audioDuration);
+    }
   }
 
   async function togglePlay() {
@@ -46,7 +81,10 @@ export default function AudioPlayer({
       try {
         await audio.play();
       } catch (error) {
-        console.error("Audio playback failed:", error);
+        console.error(
+          "Audio playback failed:",
+          error
+        );
       }
     } else {
       audio.pause();
@@ -58,7 +96,10 @@ export default function AudioPlayer({
 
     if (!audio) return;
 
-    const newTime = Math.max(0, audio.currentTime - 10);
+    const newTime = Math.max(
+      0,
+      audio.currentTime - 10
+    );
 
     audio.currentTime = newTime;
     setCurrentTime(newTime);
@@ -69,8 +110,16 @@ export default function AudioPlayer({
 
     if (!audio) return;
 
+    const audioDuration =
+      Number.isFinite(audio.duration) &&
+      audio.duration > 0
+        ? audio.duration
+        : duration;
+
+    if (audioDuration <= 0) return;
+
     const newTime = Math.min(
-      audio.duration || 0,
+      audioDuration,
       audio.currentTime + 10
     );
 
@@ -78,67 +127,99 @@ export default function AudioPlayer({
     setCurrentTime(newTime);
   }
 
-  function handleSeek(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleSeek(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
     const audio = audioRef.current;
 
     if (!audio) return;
 
-    const newTime = Number(event.target.value);
+    const newTime = Number(
+      event.target.value
+    );
 
     audio.currentTime = newTime;
     setCurrentTime(newTime);
+  }
+
+  async function markBookAsFinished() {
+    if (!user) return;
+
+    try {
+      const finishedBookRef = doc(
+        db,
+        "users",
+        user.uid,
+        "finished",
+        book.id
+      );
+
+      await setDoc(
+        finishedBookRef,
+        {
+          ...book,
+          finishedAt: serverTimestamp(),
+        },
+        {
+          merge: true,
+        }
+      );
+    } catch (error) {
+      console.error(
+        "Failed to mark book as finished:",
+        error
+      );
+    }
+  }
+
+  async function handleAudioEnded() {
+    setIsPlaying(false);
+    setCurrentTime(0);
+
+    await markBookAsFinished();
   }
 
   return (
     <>
       <audio
         ref={audioRef}
-        src={audioLink}
+        src={book.audioLink}
         preload="metadata"
-        onLoadedMetadata={() => {
-          const audio = audioRef.current;
-
-          if (!audio) return;
-
-          if (Number.isFinite(audio.duration)) {
-            setDuration(audio.duration);
-          }
-        }}
-        onDurationChange={() => {
-          const audio = audioRef.current;
-
-          if (!audio) return;
-
-          if (Number.isFinite(audio.duration)) {
-            setDuration(audio.duration);
-          }
-        }}
+        onLoadedMetadata={syncDuration}
+        onDurationChange={syncDuration}
+        onCanPlay={syncDuration}
         onTimeUpdate={() => {
           const audio = audioRef.current;
 
           if (!audio) return;
 
           setCurrentTime(audio.currentTime);
+
+          if (
+            duration === 0 &&
+            Number.isFinite(audio.duration) &&
+            audio.duration > 0
+          ) {
+            setDuration(audio.duration);
+          }
         }}
         onPlay={() => {
           setIsPlaying(true);
+          syncDuration();
         }}
         onPause={() => {
           setIsPlaying(false);
         }}
-        onEnded={() => {
-          setIsPlaying(false);
-          setCurrentTime(0);
-        }}
+        onEnded={handleAudioEnded}
       />
 
       <div className="bg-primary fixed right-0 bottom-0 left-0 z-[100] h-auto p-4 text-white">
-        <div className="flex flex-col justify-center md:flex-row h-full items-center gap-4 px-10 max-[768px]:px-4">
+        <div className="flex h-full flex-col items-center justify-center gap-4 px-10 max-[768px]:px-4 md:flex-row">
           {/* Book information */}
           <div className="flex w-[320px] shrink-0 items-center gap-4 max-[900px]:w-[240px]">
             <Image
-              src={imageLink}
-              alt={title}
+              src={book.imageLink}
+              alt={book.title}
               width={50}
               height={65}
               className="h-[60px] w-auto"
@@ -146,11 +227,11 @@ export default function AudioPlayer({
 
             <div className="min-w-0">
               <p className="truncate font-semibold">
-                {title}
+                {book.title}
               </p>
 
               <p className="truncate text-sm text-gray-300">
-                {author}
+                {book.author}
               </p>
             </div>
           </div>
@@ -173,7 +254,9 @@ export default function AudioPlayer({
             <button
               type="button"
               onClick={togglePlay}
-              aria-label={isPlaying ? "Pause" : "Play"}
+              aria-label={
+                isPlaying ? "Pause" : "Play"
+              }
               className="text-primary flex h-12 w-12 items-center justify-center rounded-full bg-white"
             >
               {isPlaying ? (
@@ -198,7 +281,7 @@ export default function AudioPlayer({
           </div>
 
           {/* Progress */}
-          <div className="flex min-w-0 flex-1 items-center justify-center mx-auto gap-4 w-full">
+          <div className="mx-auto flex w-full min-w-0 flex-1 items-center justify-center gap-4">
             <span className="w-[42px] shrink-0 text-right text-sm">
               {formatTime(currentTime)}
             </span>
@@ -206,12 +289,20 @@ export default function AudioPlayer({
             <input
               type="range"
               min={0}
-              max={duration || 0}
+              max={duration > 0 ? duration : 1}
               step={0.1}
-              value={currentTime}
+              value={
+                duration > 0
+                  ? Math.min(
+                      currentTime,
+                      duration
+                    )
+                  : 0
+              }
               onChange={handleSeek}
+              disabled={duration === 0}
               aria-label="Audio progress"
-              className="w-full max-w-[500px] cursor-pointer max-[1100px]:max-w-[350px]"
+              className="w-full max-w-[500px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 max-[1100px]:max-w-[350px]"
             />
 
             <span className="w-[42px] shrink-0 text-sm">

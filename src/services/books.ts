@@ -37,3 +37,11 @@ export async function getBookById(id: string): Promise<Book> {
   console.log("Book data:", response.data); // Log the book data for debugging
   return response.data;
 }
+
+export async function searchBooks(search: string):Promise<Book[]> {
+  const response = await api.get<Book[]>(
+    `/getBooksByAuthorOrTitle?search=${encodeURIComponent(search)}`
+  );
+
+  return response.data;
+}
